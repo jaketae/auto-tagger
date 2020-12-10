@@ -1,8 +1,5 @@
 import torch
-import transformers
+import transformers as hf
 
-model = transformers.BertForSequenceClassification.from_pretrained(
-    "bert-base-uncased", num_labels=20
-)
 
-tokenizer = transformers.BertTokenizerFast.from_pretrained("bert-base-uncased")
+class DistilBert
