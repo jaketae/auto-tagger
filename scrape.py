@@ -40,12 +40,12 @@ def get_urls():
     return [f"https://jaketae.github.io{tag.find('a')['href']}" for tag in divs]
 
 
-def get_all_tags():
+def get_all_tags(top_tags):
     root = "https://jaketae.github.io/tags/"
     html = requests.get(root).text
     soup = BeautifulSoup(html, "html.parser")
     ul = soup.find("ul", class_="taxonomy__index")
-    return set(strong.text for strong in ul.find_all("strong"))
+    return set(tuple(strong.text for strong in ul.find_all("strong"))[:top_tags])
 
 
 class Parser:
@@ -99,7 +99,7 @@ class Parser:
 def main(args):
     posts = []
     urls = get_urls()
-    all_tags = get_all_tags()
+    all_tags = get_all_tags(args.top_tags)
     for url in tqdm(urls):
         parser = Parser(url, all_tags, args.max_len, args.min_len)
         posts.extend(parser.parse())
@@ -114,6 +114,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--min_len", type=int, default=128, help="minimum length of each text"
+    )
+    parser.add_argument(
+        "--top_tags", type=int, default=8, help="number of top tags to include",
     )
     parser.add_argument(
         "--save_title",
