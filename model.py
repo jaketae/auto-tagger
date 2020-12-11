@@ -1,17 +1,26 @@
-import torch
+import torch.nn.functional as F
 from torch import nn
-import transformers as hf
+from transformers import AutoModel
 
 
-class DistilBertPostTagger(nn.Module):
-    def __init__(self, hidden_dim, num_tags, dropout=0.5):
-        super(DistilBertPostTagger, self).__init__()
-        self.bert = hf.DistilBertModel.from_pretrained("distilbert-base-uncased")
-        self.preclassifier = nn.Linear(hidden_dim, hidden_dim)
-        self.classifier = nn.Linear(hidden_dim, num_tags)
+class BertForPostClassification(nn.Module):
+    def __init__(self, model_name, num_hidden, num_labels, dropout):
+        super(BertForPostClassification, self).__init__()
+        self.bert = AutoModel.from_pretrained(model_name)
+        self.pre_classifier = nn.Linear(num_hidden, num_hidden)
+        self.classifier = nn.Linear(num_hidden, num_labels)
         self.dropout = nn.Dropout(dropout)
-    
-    def forward(self, x):
-        bert_out = self.bert(x)
-        hidden_state = distilbert_output[0]
-        pooled_output = hidden_state[:, 0]
+
+    def forward(self, tokens):
+        bert_out = self.bert(**tokens)
+        try:
+            pooler_output = bert_out["pooler_output"]
+        except KeyError:
+            pooler_out = bert_out["last_hidden_state"][:, 0]
+        pooled_output = F.relu(self.dropout(self.pre_classifier(pooler_out)))
+        logits = self.classifier(pooled_output)
+        return logits
+
+    def freeze_bert(self):
+        for p in self.bert.parameters():
+            p.requires_grad = False
