@@ -15,13 +15,13 @@ class BertForPostClassification(nn.Module):
         self.classifier = nn.Linear(hidden_size, num_labels)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, tokens):
+    def forward(self, **tokens):
         bert_out = self.bert(**tokens)
         try:
             pooler_output = bert_out["pooler_output"]
         except KeyError:
-            pooler_out = bert_out["last_hidden_state"][:, 0]
-        pooled_output = F.relu(self.dropout(self.pre_classifier(pooler_out)))
+            pooler_output = bert_out["last_hidden_state"][:, 0]
+        pooled_output = F.relu(self.dropout(self.pre_classifier(pooler_output)))
         logits = self.classifier(pooled_output)
         return logits
 
