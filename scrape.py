@@ -3,6 +3,7 @@ import argparse
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from sklearn.model_selection import train_test_split
 from tqdm.auto import tqdm
 
 
@@ -106,8 +107,11 @@ def main(args):
         data = parser.parse()
         if data:
             posts.extend(data)
-    df = pd.DataFrame(posts).set_index("title")
-    df.to_csv(args.save_title)
+    total_df = pd.DataFrame(posts).set_index("title")
+    tv_df, test_df = train_test_split(total_df, test_size=args.test_size)
+    train_df, val_df = train_test_split(tv_df, test_size=args.val_size)
+    for title, df in zip((train_df, val_df, test_df), ("train", "val", "test")):
+        df.to_csv(os.path.join("data", title))
 
 
 if __name__ == "__main__":
@@ -122,10 +126,10 @@ if __name__ == "__main__":
         "--top_tags", type=int, default=8, help="number of top tags to include",
     )
     parser.add_argument(
-        "--save_title",
-        type=str,
-        default="data.csv",
-        help="save title for generated csv",
-    )
+        "--test_size", type=float, default=0.15, help="size of test samples"
+    ),
+    parser.add_argument(
+        "--val_size", type=float, default=0.15, help="size of validation samples"
+    ),
     args = parser.parse_args()
     main(args)
