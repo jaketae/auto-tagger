@@ -5,7 +5,7 @@ import torch
 from tqdm.auto import tqdm
 from transformers import AdamW, AutoTokenizer, get_linear_schedule_with_warmup
 
-from dataset import make_loaders
+from dataset import make_loader
 from model import get_model
 from utils import EarlyStopMonitor, Logger, save_checkpoint, set_seed
 
@@ -13,14 +13,16 @@ from utils import EarlyStopMonitor, Logger, save_checkpoint, set_seed
 def main(args):
     set_seed()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    train_loader = make_loader("train", args.batch_size)
+    val_loader = make_loader("val", args.batch_size)
+    _, label = iter(train_loader).next()
+    num_labels = label.size(1)
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     model = BertForPostClassification(
-        args.model_name, args.num_labels, args.dropout, args.freeze_bert
+        args.model_name, num_labels, args.dropout, args.freeze_bert
     ).to(device)
     if args.weight_path:
         model.load_state_dict(torch.load(args.weight_path))
-    train_loader = make_loaders(os.path.join("data", "train.csv"), args.batch_size)
-    val_loader = make_loaders(os.path.join("data", "val.csv"), args.batch_size)
     criterion = torch.nn.BCEWithLogits()
     optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8)
     scheduler = get_linear_schedule_with_warmup(
@@ -80,7 +82,7 @@ if __name__ == "__main__":
         choices=["roberta", "distilbert", "longformer"],
     )
     parser.add_argument("--weight_path", type=float, default=""),
-    parser.add_argument("--num_labels", type=int, default=10),
+    parser.add_argument("--num_labels", type=int, default=8),
     parser.add_argument("--dropout", type=float, default=0.5),
     parser.add_argument("--num_epoch", type=int, default=5),
     parser.add_argument("--log_interval", type=int, default=1),

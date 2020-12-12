@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import pandas as pd
 import requests
@@ -110,8 +111,8 @@ def main(args):
     total_df = pd.DataFrame(posts).set_index("title")
     tv_df, test_df = train_test_split(total_df, test_size=args.test_size)
     train_df, val_df = train_test_split(tv_df, test_size=args.val_size)
-    for title, df in zip((train_df, val_df, test_df), ("train", "val", "test")):
-        df.to_csv(os.path.join("data", title))
+    for title, df in zip(("train", "val", "test"), (train_df, val_df, test_df)):
+        df.to_csv(os.path.join("data", f"{title}.csv"))
 
 
 if __name__ == "__main__":

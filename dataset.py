@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset, Subset
@@ -15,6 +17,11 @@ class BlogDataset(Dataset):
         return len(self.data)
 
 
-def make_loader(file_path, batch_size):
-    dataset = BlogDataset(file_path)
+def make_loader(mode, batch_size):
+    assert mode in {
+        "train",
+        "val",
+        "test",
+    }, "`mode` must be one of 'train', 'val', or 'test'"
+    dataset = BlogDataset(os.path.join("data", f"{mode}.csv"))
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
