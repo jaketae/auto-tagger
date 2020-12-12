@@ -91,9 +91,10 @@ class Parser:
         title = self.get_title()
         chunks = self.get_chunks()
         tags = self.get_tags()
-        for chunk in chunks:
-            parsed.append({"title": title, "body": chunk, **tags})
-        return parsed
+        if sum(tags.values()):
+            for chunk in chunks:
+                parsed.append({"title": title, "body": chunk, **tags})
+            return parsed
 
 
 def main(args):
@@ -102,7 +103,9 @@ def main(args):
     all_tags = get_all_tags(args.top_tags)
     for url in tqdm(urls):
         parser = Parser(url, all_tags, args.max_len, args.min_len)
-        posts.extend(parser.parse())
+        data = parser.parse()
+        if data:
+            posts.extend(data)
     df = pd.DataFrame(posts).set_index("title")
     df.to_csv(args.save_title)
 
