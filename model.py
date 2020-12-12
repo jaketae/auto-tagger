@@ -4,11 +4,12 @@ from transformers import AutoModel
 
 
 class BertForPostClassification(nn.Module):
-    def __init__(self, model_name, num_hidden, num_labels, dropout):
+    def __init__(self, model_name, num_labels, dropout):
         super(BertForPostClassification, self).__init__()
         self.bert = AutoModel.from_pretrained(model_name)
-        self.pre_classifier = nn.Linear(num_hidden, num_hidden)
-        self.classifier = nn.Linear(num_hidden, num_labels)
+        hidden_size = self.bert.config.hidden_size
+        self.pre_classifier = nn.Linear(hidden_size, hidden_size)
+        self.classifier = nn.Linear(hidden_size, num_labels)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, tokens):
