@@ -3,7 +3,7 @@ import os
 
 import torch
 from tqdm.auto import tqdm
-from transformers import AdamW, AutoTokenizer
+from transformers import AdamW, AutoTokenizer, get_linear_schedule_with_warmup
 
 from dataset import make_loaders
 from model import get_model
@@ -22,13 +22,18 @@ def main(args):
     train_loader = make_loaders(os.path.join("data", "train.csv"), args.batch_size)
     val_loader = make_loaders(os.path.join("data", "val.csv"), args.batch_size)
     criterion = torch.nn.BCEWithLogits()
-    optimizer = AdamW(model.parameters(), lr=2e-5)
+    optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8)
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer,
+        num_warmup_steps=args.warmup_steps,
+        num_training_steps=args.num_epochs * len(train_loader),
+    )
     monitor = EarlyStopMonitor(args.patience)
     logger = Logger(args.num_epochs, args.log_interval)
     for epoch in range(args.num_epochs):
         model.train()
         train_loss = run_epoch(
-            train_loader, tokenizer, model, device, criterion, optimizer
+            train_loader, tokenizer, model, device, criterion, optimizer, scheduler
         )
         model.eval()
         with torch.no_grad():
@@ -42,7 +47,13 @@ def main(args):
         save_checkpoint(model, args.model_name, logger)
 
 
-def run_epoch(data_loader, tokenizer, model, device, criterion, optimizer=None):
+def run_epoch(
+    data_loader, tokenizer, model, device, criterion, optimizer=None, scheduler=None
+):
+    if optimizer is None:
+        assert (
+            scheduler is None
+        ), "If `scheduler` is provided, you must also specify an `optimizer`"
     total_loss = 0
     for (inputs, labels) in tqdm(data_loader):
         labels = labels.to(device)
@@ -50,13 +61,14 @@ def run_epoch(data_loader, tokenizer, model, device, criterion, optimizer=None):
             inputs, truncation=True, padding=True, return_tensors="pt"
         ).to(device)
         outputs = model(**tokens)
-        loss = criterion(outputs["logits"], labels)
+        loss = criterion(outputs, labels)
         if optimizer:
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            scheduler.step()
         total_loss += loss.item()
-    return total_loss / len(train_loader)
+    return total_loss / len(data_loader)
 
 
 if __name__ == "__main__":
