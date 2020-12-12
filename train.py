@@ -6,7 +6,7 @@ from tqdm.auto import tqdm
 from transformers import AdamW, AutoTokenizer, get_linear_schedule_with_warmup
 
 from dataset import make_loader
-from model import get_model
+from model import BertForPostClassification
 from utils import EarlyStopMonitor, Logger, save_checkpoint, set_seed
 
 
@@ -23,7 +23,7 @@ def main(args):
     ).to(device)
     if args.weight_path:
         model.load_state_dict(torch.load(args.weight_path))
-    criterion = torch.nn.BCEWithLogits()
+    criterion = torch.nn.BCEWithLogitsLoss()
     optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8)
     scheduler = get_linear_schedule_with_warmup(
         optimizer,
@@ -60,7 +60,7 @@ def run_epoch(
     for (inputs, labels) in tqdm(data_loader):
         labels = labels.to(device)
         tokens = tokenizer(
-            inputs, truncation=True, padding=True, return_tensors="pt"
+            list(inputs), truncation=True, padding=True, return_tensors="pt"
         ).to(device)
         outputs = model(**tokens)
         loss = criterion(outputs, labels)
@@ -79,12 +79,15 @@ if __name__ == "__main__":
         "--model_name",
         type=str,
         default="roberta",
-        choices=["roberta", "distilbert", "longformer"],
+        choices=[
+            "roberta-base",
+            "distilbert-base-uncased",
+            "allenai/longformer-base-4096",
+        ],
     )
-    parser.add_argument("--weight_path", type=float, default=""),
-    parser.add_argument("--num_labels", type=int, default=8),
+    parser.add_argument("--weight_path", type=str, default=""),
     parser.add_argument("--dropout", type=float, default=0.5),
-    parser.add_argument("--num_epoch", type=int, default=5),
+    parser.add_argument("--num_epochs", type=int, default=5),
     parser.add_argument("--log_interval", type=int, default=1),
     parser.add_argument("--batch_size", type=int, default=16),
     parser.add_argument("--freeze_bert", type=bool, default=True),
