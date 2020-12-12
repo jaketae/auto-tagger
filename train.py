@@ -6,9 +6,11 @@ from transformers import AdamW, AutoTokenizer
 
 from dataset import make_loaders
 from model import get_model
+from utils import EarlyStopMonitor, Logger, save_checkpoint, set_seed
 
 
 def main(args):
+    set_seed()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     model = BertForPostClassification(
@@ -16,16 +18,20 @@ def main(args):
     ).to(device)
     if args.freeze_bert:
         model.freeze_bert()
-    train_loader, test_loader = make_loaders(
-        args.file_path, args.batch_size, args.test_size
-    )
+    train_loader, _ = make_loaders(args.file_path, args.batch_size, args.test_size)
     criterion = torch.nn.BCEWithLogits()
-    optimizer = AdamW(model.parameters(), lr=1e-5)
-    loss_history = []
+    optimizer = AdamW(model.parameters(), lr=2e-5)
+    monitor = EarlyStopMonitor(args.patience)
+    logger = Logger(args.num_epochs, args.log_interval)
     for epoch in args.num_epochs:
         loss = run_epoch(train_loader, tokenizer, model, criterion, optimizer, device)
-        loss_history.append(loss)
-    torch.save(model.state_dict(), os.path.join("save", model_name))
+        logger(epoch, loss)
+        monitor(loss)
+        if monitor.stop:
+            save_checkpoint(model, logger)
+            break
+    if not monitor.stop:
+        save_checkpoint(model, logger)
 
 
 def run_epoch(data_loader, tokenizer, model, device, criterion, optimizer=None):
@@ -57,10 +63,11 @@ if __name__ == "__main__":
     parser.add_argument("--num_labels", type=int, default=10),
     parser.add_argument("--dropout", type=float, default=0.5),
     parser.add_argument("--num_epoch", type=int, default=5),
+    parser.add_argument("--log_interval", type=int, default=1),
     parser.add_argument("--batch_size", type=int, default=16),
-    parser.add_argument("--test_size", type=float, default=0.1),
+    parser.add_argument("--split_size", type=float, default=0.15),
     parser.add_argument("--file_path", type=str, default="data.csv"),
     parser.add_argument("--freeze_bert", type=bool, default=True),
-    parser.add_argument("--verbose", type=bool, default=False),
+    parser.add_argument("--patience", type=int, default=3),
     args = parser.parse_args()
     main(args)
