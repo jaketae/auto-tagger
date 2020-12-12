@@ -17,6 +17,8 @@ def main(args):
     model = BertForPostClassification(
         args.model_name, args.num_labels, args.dropout, args.freeze_bert
     ).to(device)
+    if args.weight_path:
+        model.load_state_dict(torch.load(args.weight_path))
     train_loader = make_loaders(os.path.join("data", "train.csv"), args.batch_size)
     val_loader = make_loaders(os.path.join("data", "val.csv"), args.batch_size)
     criterion = torch.nn.BCEWithLogits()
@@ -65,6 +67,7 @@ if __name__ == "__main__":
         default="roberta",
         choices=["roberta", "distilbert", "longformer"],
     )
+    parser.add_argument("--weight_path", type=float, default=""),
     parser.add_argument("--num_labels", type=int, default=10),
     parser.add_argument("--dropout", type=float, default=0.5),
     parser.add_argument("--num_epoch", type=int, default=5),
