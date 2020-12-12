@@ -4,9 +4,12 @@ from transformers import AutoModel
 
 
 class BertForPostClassification(nn.Module):
-    def __init__(self, model_name, num_labels, dropout):
+    def __init__(self, model_name, num_labels, dropout, freeze_bert):
         super(BertForPostClassification, self).__init__()
         self.bert = AutoModel.from_pretrained(model_name)
+        if freeze_bert:
+            for param in self.bert.parameters():
+                param.requires_grad = False
         hidden_size = self.bert.config.hidden_size
         self.pre_classifier = nn.Linear(hidden_size, hidden_size)
         self.classifier = nn.Linear(hidden_size, num_labels)
@@ -22,6 +25,3 @@ class BertForPostClassification(nn.Module):
         logits = self.classifier(pooled_output)
         return logits
 
-    def freeze_bert(self):
-        for p in self.bert.parameters():
-            p.requires_grad = False
