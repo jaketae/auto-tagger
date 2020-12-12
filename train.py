@@ -27,7 +27,7 @@ def main(args):
     optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8)
     scheduler = get_linear_schedule_with_warmup(
         optimizer,
-        num_warmup_steps=args.warmup_steps,
+        num_warmup_steps=0,
         num_training_steps=args.num_epochs * len(train_loader),
     )
     monitor = EarlyStopMonitor(args.patience)
