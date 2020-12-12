@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 
 import pandas as pd
 import requests
@@ -72,19 +73,15 @@ class Parser:
     def get_chunks(self):
         result = []
         p_tags = self.soup.find_all("p", class_="")
-        for tag in p_tags:
-            tmp = ""
-            flag = True
-            for code in tag.find_all("code"):
-                code.extract()
-            for char in tag.text:
-                if char == "$":
-                    flag = not flag
-                    continue
-                if flag:
-                    tmp += char
-            result.append(tmp)
+        for p in p_tags:
+            for remove_type in ("code", "script", "span"):
+                for remove_tag in p.find_all(remove_type):
+                    remove_tag.decompose()
+            result.append(p.text.strip())
         text = " ".join(result)
+        for regexp in (r"\$.*?\$", r"\\\(.*?\\\)"):
+            text = re.sub(regexp, "", text)
+        print(text)
         chunks = chunkify(text, self.max_len, self.min_len)
         return chunks
 
