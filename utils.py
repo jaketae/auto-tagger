@@ -14,9 +14,9 @@ def set_seed(seed=42):
     torch.backends.cudnn.benchmark = True
 
 
-def save_checkpoint(model, logger):
-    logger.write()
-    torch.save(model.state_dict(), os.path.join("save", "checkpoint.pt"))
+def save_checkpoint(model, model_name, logger):
+    logger.write(os.path.join("logs", f"{model_name}.txt"))
+    torch.save(model.state_dict(), os.path.join("checkpoints", f"{model_name}.pt"))
 
 
 class EarlyStopMonitor:
@@ -51,10 +51,14 @@ class Logger:
         self.num_epochs = num_epochs
         self.log = []
 
-    def __call__(self, epoch, loss):
-        self.log.append(f"Epoch [{epoch}/{self.num_epochs}], Loss: {loss:.4f}")
+    def __call__(self, epoch, train_loss, val_loss):
+        self.log.append(
+            f"Epoch [{epoch}/{self.num_epochs}], "
+            f"Train Loss: {train_loss:.4f}, "
+            f"Val Loss: {val_loss:.4f} "
+        )
 
-    def write(self, save_title="log.txt"):
-        with open(save_title, "w+") as f:
+    def write(self, out_path):
+        with open(out_path, "w+") as f:
             f.write("\n".join(self.log))
 
