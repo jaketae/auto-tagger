@@ -39,11 +39,7 @@ if __name__ == "__main__":
         "--model_name",
         type=str,
         default="roberta-base",
-        choices=[
-            "roberta-base",
-            "distilbert-base-uncased",
-            "allenai/longformer-base-4096",
-        ],
+        choices=["roberta-base", "distilroberta-base", "allenai/longformer-base-4096",],
     )
     parser.add_argument("--weight_path", type=str, help="path to model weigts")
     parser.add_argument("--batch_size", type=int, default=16)

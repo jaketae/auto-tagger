@@ -26,7 +26,7 @@ def main(args):
     optimizer = AdamW(
         [
             {"params": model.bert.parameters(), "lr": 3e-5, "eps": 1e-8},
-            {"params": model.classifier.parameters(), "lr": 1e-3},
+            {"params": model.classifier.parameters()},
         ]
     )
     scheduler = get_linear_schedule_with_warmup(
@@ -75,12 +75,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_name",
         type=str,
-        default="roberta",
-        choices=[
-            "roberta-base",
-            "distilbert-base-uncased",
-            "allenai/longformer-base-4096",
-        ],
+        default="roberta-base",
+        choices=["roberta-base", "distilroberta-base", "allenai/longformer-base-4096",],
     )
     parser.add_argument("--weight_path", type=str, default="")
     parser.add_argument("--dropout", type=float, default=0.5)
