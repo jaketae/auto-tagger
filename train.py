@@ -35,11 +35,11 @@ def main(args):
     for epoch in range(args.num_epochs):
         model.train()
         train_loss = run_epoch(
-            train_loader, tokenizer, model, device, criterion, optimizer, scheduler
+            model, tokenizer, train_loader, device, criterion, optimizer, scheduler
         )
         model.eval()
         with torch.no_grad():
-            val_loss = run_epoch(val_loader, tokenizer, model, device, criterion)
+            val_loss = run_epoch(model, tokenizer, val_loader, device, criterion)
         logger(epoch, train_loss, val_loss)
         monitor(val_loss)
         if monitor.stop:
@@ -50,7 +50,7 @@ def main(args):
 
 
 def run_epoch(
-    data_loader, tokenizer, model, device, criterion, optimizer=None, scheduler=None
+    model, tokenizer, data_loader, device, criterion, optimizer=None, scheduler=None
 ):
     if optimizer is None:
         assert (
