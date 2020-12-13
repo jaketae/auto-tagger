@@ -63,11 +63,14 @@ class Logger:
         self.log = []
 
     def __call__(self, epoch, train_loss, val_loss):
-        self.log.append(
+        log_string = (
             f"Epoch [{epoch}/{self.num_epochs}], "
             f"Train Loss: {train_loss:.4f}, "
             f"Val Loss: {val_loss:.4f} "
         )
+        if epoch % self.log_interval == 0:
+            tqdm.write(log_string)
+        self.log.append(log_string)
 
     def write(self, out_path):
         with open(out_path, "w+") as f:
