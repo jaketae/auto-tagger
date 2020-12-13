@@ -29,6 +29,7 @@ def get_accuracy(model, tokenizer, test_loader, device):
     num_samples = 0
     num_correct = 0
     for (labels, outputs) in generator(model, tokenizer, test_loader, device):
+        outputs = outputs > 0
         num_samples += labels.size(0)
         num_correct += (labels == outputs).sum().item()
     return num_correct / num_samples
