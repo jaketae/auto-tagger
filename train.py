@@ -7,7 +7,7 @@ from transformers import AdamW, AutoTokenizer, get_linear_schedule_with_warmup
 
 from dataset import make_loader
 from model import BertForPostClassification
-from utils import EarlyStopMonitor, Logger, save_checkpoint, set_seed
+from utils import EarlyStopMonitor, Logger, generator, save_checkpoint, set_seed
 
 
 def main(args):
@@ -57,12 +57,7 @@ def run_epoch(
             scheduler is None
         ), "If `scheduler` is provided, you must also specify an `optimizer`"
     total_loss = 0
-    for (inputs, labels) in tqdm(data_loader):
-        labels = labels.to(device)
-        tokens = tokenizer(
-            list(inputs), truncation=True, padding=True, return_tensors="pt"
-        ).to(device)
-        outputs = model(**tokens)
+    for (labels, outputs) in generator(model, tokenizer, data_loader, device):
         loss = criterion(outputs, labels)
         if optimizer:
             optimizer.zero_grad()

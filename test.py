@@ -1,9 +1,11 @@
 import argparse
+import os
 
 import torch
 from tqdm.auto import tqdm
 
 from dataset import make_loader
+from utils import generator
 
 
 def main(args):
@@ -16,7 +18,7 @@ def main(args):
     model = BertForPostClassification(
         args.model_name, num_labels, args.dropout, args.freeze_bert
     ).to(device)
-    model.load_state_dict(torch.load(args.weight_path))
+    model.load_state_dict(torch.load(os.path.join("checkpoints", args.weight_path)))
     model.eval()
     print(get_accuracy(model, tokenizer, test_loader, device))
 
@@ -25,12 +27,7 @@ def main(args):
 def get_accuracy(model, tokenizer, test_loader, device):
     num_samples = 0
     num_correct = 0
-    for (inputs, labels) in tqdm(test_loader):
-        labels = labels.to(device)
-        tokens = tokenizer(
-            list(inputs), truncation=True, padding=True, return_tensors="pt"
-        ).to(device)
-        outputs = model(**tokens)
+    for (labels, outputs) in generator(model, tokenizer, test_loader, device):
         num_samples += labels.size(0)
         num_correct += (labels == outputs).sum().item()
     return num_correct / num_samples
