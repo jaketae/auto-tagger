@@ -2,7 +2,6 @@ import argparse
 import os
 
 import torch
-from tqdm.auto import tqdm
 
 from dataset import make_loader
 from utils import generator

@@ -2,7 +2,6 @@ import argparse
 import os
 
 import torch
-from tqdm.auto import tqdm
 from transformers import AdamW, AutoTokenizer, get_linear_schedule_with_warmup
 
 from dataset import make_loader
