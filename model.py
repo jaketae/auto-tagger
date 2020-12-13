@@ -4,7 +4,7 @@ from transformers import AutoModel
 
 
 class BertForPostClassification(nn.Module):
-    def __init__(self, model_name, num_labels, dropout, freeze_bert):
+    def __init__(self, model_name, num_labels, dropout, freeze_bert=False):
         super(BertForPostClassification, self).__init__()
         self.bert = AutoModel.from_pretrained(model_name)
         self.bert.config.return_dict = True

@@ -16,9 +16,7 @@ def main(args):
     _, label = iter(test_loader).next()
     num_labels = label.size(1)
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
-    model = BertForPostClassification(
-        args.model_name, num_labels, args.dropout, args.freeze_bert
-    ).to(device)
+    model = BertForPostClassification(args.model_name, num_labels, 0).to(device)
     model.load_state_dict(torch.load(os.path.join("checkpoints", args.weight_path)))
     model.eval()
     print(get_accuracy(model, tokenizer, test_loader, device))
