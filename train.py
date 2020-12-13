@@ -23,7 +23,12 @@ def main(args):
     if args.weight_path:
         model.load_state_dict(torch.load(args.weight_path))
     criterion = torch.nn.BCEWithLogitsLoss()
-    optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8)
+    optimizer = AdamW(
+        [
+            {"params": model.bert.parameters(), "lr": 3e-5, "eps": 1e-8},
+            {"params": model.classifier.parameters(), "lr": 1e-3},
+        ]
+    )
     scheduler = get_linear_schedule_with_warmup(
         optimizer,
         num_warmup_steps=0,

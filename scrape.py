@@ -81,7 +81,6 @@ class Parser:
         text = " ".join(result)
         for regexp in (r"\$.*?\$", r"\\\(.*?\\\)"):
             text = re.sub(regexp, "", text)
-        print(text)
         chunks = chunkify(text, self.max_len, self.min_len)
         return chunks
 
