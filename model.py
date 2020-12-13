@@ -15,9 +15,12 @@ class BertForPostClassification(nn.Module):
             for param in self.bert.parameters():
                 param.requires_grad = False
         hidden_size = self.bert.config.hidden_size
-        self.pre_classifier = nn.Linear(hidden_size, hidden_size)
-        self.classifier = nn.Linear(hidden_size, num_labels)
-        self.dropout = nn.Dropout(dropout)
+        self.classier = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.Dropout(dropout),
+            nn.ReLU(),
+            nn.Linear(hidden_size, num_labels),
+        )
 
     def forward(self, **tokens):
         bert_out = self.bert(**tokens)
@@ -25,7 +28,6 @@ class BertForPostClassification(nn.Module):
             pooler_output = bert_out["pooler_output"]
         except KeyError:
             pooler_output = bert_out["last_hidden_state"][:, 0]
-        pooled_output = F.relu(self.dropout(self.pre_classifier(pooler_output)))
-        logits = self.classifier(pooled_output)
+        logits = self.classier(pooler_output)
         return logits
 
