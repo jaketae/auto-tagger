@@ -42,10 +42,8 @@ def main(args):
         logger(epoch, train_loss, val_loss)
         monitor(val_loss)
         if monitor.stop:
-            save_checkpoint(model, args.model_name, logger)
             break
-    if not monitor.stop:
-        save_checkpoint(model, args.model_name, logger)
+    save_checkpoint(model, args.model_name, logger)
 
 
 def run_epoch(
