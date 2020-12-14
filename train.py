@@ -22,7 +22,7 @@ def main(args):
         args.model_name, num_labels, args.dropout, args.freeze_bert
     ).to(device)
     if args.weight_path:
-        model.load_state_dict(torch.load(args.weight_path))
+        model.load_state_dict(torch.load(os.path.join("checkpoints", args.weight_path)))
     criterion = torch.nn.BCEWithLogitsLoss()
     optimizer = AdamW(
         [
