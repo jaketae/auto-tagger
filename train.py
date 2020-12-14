@@ -2,7 +2,7 @@ import argparse
 import os
 
 import torch
-from transformers import AdamW, AutoTokenizer, get_linear_schedule_with_warmup
+from transformers import AdamW, get_linear_schedule_with_warmup
 
 from dataset import make_loader
 from model import BertForPostClassification
