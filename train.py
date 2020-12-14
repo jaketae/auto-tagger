@@ -18,7 +18,7 @@ def main(args):
     _, label = iter(train_loader).next()
     num_labels = label.size(1)
     model = BertForPostClassification(
-        args.model_name, num_labels, args.dropout, args.freeze_bert
+        args.model_name, num_labels, args.dropout, device, args.freeze_bert
     ).to(device)
     if args.weight_path:
         model.load_state_dict(torch.load(os.path.join("checkpoints", args.weight_path)))

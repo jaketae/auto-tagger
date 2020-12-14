@@ -4,13 +4,14 @@ from transformers import AutoModel, AutoTokenizer
 
 
 class BertForPostClassification(nn.Module):
-    def __init__(self, model_name, num_labels, dropout, freeze_bert=False):
+    def __init__(self, model_name, num_labels, dropout, device, freeze_bert=False):
         super(BertForPostClassification, self).__init__()
+        self.device = device
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.bert = AutoModel.from_pretrained(
             model_name,
             return_dict=False,
-            add_cros_attention=False,
+            add_cross_attention=False,
             output_attentions=False,
             output_hidden_states=False,
         )
@@ -26,7 +27,9 @@ class BertForPostClassification(nn.Module):
         )
 
     def forward(self, x):
-        tokens = self.tokenizer(x, truncation=True, padding=True, return_tensors="pt")
+        tokens = self.tokenizer(
+            list(x), truncation=True, padding=True, return_tensors="pt"
+        ).to(self.device)
         bert_out = self.bert(**tokens)
         clf_tokens = bert_out[0][:, 0, :]
         logits = self.classifier(clf_tokens)
