@@ -12,7 +12,8 @@ from utils import generator, set_seed
 def main(args):
     set_seed()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    test_loader = make_loader("test", args.batch_size)
+    data_dir = os.path.join("data", args.data_dir)
+    test_loader = make_loader("test", data_dir, args.batch_size)
     _, label = iter(test_loader).next()
     num_labels = label.size(1)
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
@@ -41,6 +42,7 @@ if __name__ == "__main__":
         default="roberta-base",
         choices=["roberta-base", "distilroberta-base", "allenai/longformer-base-4096",],
     )
+    parser.add_argument("--data_dir", type=str, default="")
     parser.add_argument("--weight_path", type=str, help="path to model weigts")
     parser.add_argument("--batch_size", type=int, default=16)
     args = parser.parse_args()
