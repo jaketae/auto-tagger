@@ -17,7 +17,6 @@ def main(args):
     val_loader = make_loader("val", data_dir, args.batch_size)
     _, label = iter(train_loader).next()
     num_labels = label.size(1)
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     model = BertForPostClassification(
         args.model_name, num_labels, args.dropout, args.freeze_bert
     ).to(device)
@@ -40,11 +39,11 @@ def main(args):
     for epoch in range(args.num_epochs):
         model.train()
         train_loss = run_epoch(
-            model, tokenizer, train_loader, device, criterion, optimizer, scheduler
+            model, train_loader, device, criterion, optimizer, scheduler
         )
         model.eval()
         with torch.no_grad():
-            val_loss = run_epoch(model, tokenizer, val_loader, device, criterion)
+            val_loss = run_epoch(model, val_loader, device, criterion)
         logger(epoch, train_loss, val_loss)
         monitor(val_loss)
         if monitor.stop:
@@ -52,15 +51,13 @@ def main(args):
     save_checkpoint(model, f"{args.data_dir}_{args.model_name}", logger)
 
 
-def run_epoch(
-    model, tokenizer, data_loader, device, criterion, optimizer=None, scheduler=None
-):
+def run_epoch(model, data_loader, device, criterion, optimizer=None, scheduler=None):
     if optimizer is None:
         assert (
             scheduler is None
         ), "If `scheduler` is provided, you must also specify an `optimizer`"
     total_loss = 0
-    for (labels, outputs) in generator(model, tokenizer, data_loader, device):
+    for (labels, outputs) in generator(model, data_loader, device):
         loss = criterion(outputs, labels)
         if optimizer:
             optimizer.zero_grad()

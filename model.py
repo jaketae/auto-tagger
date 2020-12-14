@@ -26,7 +26,7 @@ class BertForPostClassification(nn.Module):
         )
 
     def forward(self, x):
-        tokens = self.tokenizer(x)
+        tokens = self.tokenizer(x, truncation=True, padding=True, return_tensors="pt")
         bert_out = self.bert(**tokens)
         clf_tokens = bert_out[0][:, 0, :]
         logits = self.classifier(clf_tokens)
