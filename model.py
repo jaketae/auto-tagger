@@ -15,7 +15,7 @@ class BertForPostClassification(nn.Module):
             for param in self.bert.parameters():
                 param.requires_grad = False
         hidden_size = self.bert.config.hidden_size
-        self.classier = nn.Sequential(
+        self.classifier = nn.Sequential(
             nn.Linear(hidden_size, hidden_size),
             nn.Dropout(dropout),
             nn.ReLU(),
@@ -25,6 +25,6 @@ class BertForPostClassification(nn.Module):
     def forward(self, **tokens):
         bert_out = self.bert(**tokens)
         clf_tokens = bert_out[0][:, 0, :]
-        logits = self.classier(clf_tokens)
+        logits = self.classifier(clf_tokens)
         return logits
 
