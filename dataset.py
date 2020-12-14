@@ -17,11 +17,11 @@ class BlogDataset(Dataset):
         return len(self.data)
 
 
-def make_loader(mode, batch_size):
+def make_loader(mode, data_dir, batch_size):
     assert mode in {
         "train",
         "val",
         "test",
     }, "`mode` must be one of 'train', 'val', or 'test'"
-    dataset = BlogDataset(os.path.join("data", f"{mode}.csv"))
+    dataset = BlogDataset(os.path.join(data_dir, f"{mode}.csv"))
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
