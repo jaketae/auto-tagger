@@ -29,9 +29,13 @@ def get_accuracy(model, tokenizer, test_loader, device):
     num_correct = 0
     for (labels, outputs) in generator(model, tokenizer, test_loader, device):
         outputs = outputs > 0
-        num_samples += labels.size(0)
+        num_samples += torch.numel(labels)
         num_correct += (labels == outputs).sum().item()
     return num_correct / num_samples
+
+
+def get_hamming_accuracy(model, tokenizer, test_loader, device):
+    return
 
 
 if __name__ == "__main__":
