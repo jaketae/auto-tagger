@@ -20,10 +20,10 @@ def save_checkpoint(model, model_name, logger):
     torch.save(model.state_dict(), os.path.join("checkpoints", f"{model_name}.pt"))
 
 
-def generator(model, data_loader, device):
+def generator(model, data_loader):
     for (inputs, labels) in tqdm(data_loader):
-        labels = labels.to(device)
         outputs = model(inputs)
+        labels = labels.to(model.device)
         yield labels, outputs
 
 

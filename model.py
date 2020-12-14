@@ -4,9 +4,9 @@ from transformers import AutoModel, AutoTokenizer
 
 
 class BertForPostClassification(nn.Module):
-    def __init__(self, model_name, num_labels, dropout, device, freeze_bert=False):
+    def __init__(self, model_name, num_labels, dropout, freeze_bert=False):
         super(BertForPostClassification, self).__init__()
-        self.device = device
+        self.device = None
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.bert = AutoModel.from_pretrained(
             model_name,
@@ -26,7 +26,12 @@ class BertForPostClassification(nn.Module):
             nn.Linear(hidden_size, num_labels),
         )
 
+    def to(self, device):
+        self.device = device
+        self.to(device)
+
     def forward(self, x):
+        assert self.device, "Have you called `.to(device)` on this model?"
         tokens = self.tokenizer(
             list(x), truncation=True, padding=True, return_tensors="pt"
         ).to(self.device)
@@ -34,4 +39,8 @@ class BertForPostClassification(nn.Module):
         clf_tokens = bert_out[0][:, 0, :]
         logits = self.classifier(clf_tokens)
         return logits
+
+    def predict(self, x, tags):
+        logits = self.forward(x)
+        labels = logitss > 0
 
