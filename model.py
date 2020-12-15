@@ -1,4 +1,4 @@
-import torch.nn.functional as F
+import torch
 from torch import nn
 from transformers import AutoModel, AutoTokenizer
 
@@ -40,7 +40,12 @@ class BertForPostClassification(nn.Module):
         logits = self.classifier(clf_tokens)
         return logits
 
+    @torch.no_grad()
     def predict(self, x, tags):
-        logits = self.forward(x)
-        labels = logitss > 0
+        predictions = self.forward(x) > 0
+        result = [[]] * predictions.size(0)
+        index, tag_index = torch.where(result)
+        for i, tag_i in zip(index, tag_index):
+            result[i].append(tags[tag_i])
+        return result
 
