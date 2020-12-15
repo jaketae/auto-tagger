@@ -38,12 +38,10 @@ def main(args):
     logger = Logger(args.num_epochs, args.log_interval)
     for epoch in range(args.num_epochs):
         model.train()
-        train_loss = run_epoch(
-            model, train_loader, device, criterion, optimizer, scheduler
-        )
+        train_loss = run_epoch(model, train_loader, criterion, optimizer, scheduler)
         model.eval()
         with torch.no_grad():
-            val_loss = run_epoch(model, val_loader, device, criterion)
+            val_loss = run_epoch(model, val_loader, criterion)
         logger(epoch, train_loss, val_loss)
         monitor(val_loss)
         if monitor.stop:
@@ -51,7 +49,7 @@ def main(args):
     save_checkpoint(model, f"{args.data_dir}_{args.model_name}", logger)
 
 
-def run_epoch(model, data_loader, device, criterion, optimizer=None, scheduler=None):
+def run_epoch(model, data_loader, criterion, optimizer=None, scheduler=None):
     if optimizer is None:
         assert (
             scheduler is None

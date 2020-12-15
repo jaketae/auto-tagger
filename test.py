@@ -16,18 +16,17 @@ def main(args):
     test_loader = make_loader("test", data_dir, args.batch_size)
     _, label = iter(test_loader).next()
     num_labels = label.size(1)
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     model = BertForPostClassification(args.model_name, num_labels, 0).to(device)
     model.load_state_dict(torch.load(os.path.join("checkpoints", args.weight_path)))
     model.eval()
-    print(get_accuracy(model, tokenizer, test_loader, device))
+    print(get_accuracy(model, test_loader, device))
 
 
 @torch.no_grad()
-def get_accuracy(model, tokenizer, test_loader, device):
+def get_accuracy(model, test_loader, device):
     num_samples = 0
     num_correct = 0
-    for (labels, outputs) in generator(model, tokenizer, test_loader, device):
+    for (labels, outputs) in generator(model, test_loader):
         outputs = outputs > 0
         num_samples += torch.numel(labels)
         num_correct += (labels == outputs).sum().item()
