@@ -12,8 +12,7 @@ from utils import generator, set_seed
 def main(args):
     set_seed()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    data_dir = os.path.join("data", args.data_dir)
-    test_loader = make_loader("test", data_dir, args.batch_size)
+    test_loader = make_loader("test", args.data_dir, args.batch_size)
     _, label = iter(test_loader).next()
     num_labels = label.size(1)
     model = BertForPostClassification(args.model_name, num_labels, 0).to(device)

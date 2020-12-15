@@ -15,9 +15,9 @@ def set_seed(seed=42):
     torch.backends.cudnn.benchmark = True
 
 
-def save_checkpoint(model, model_name, logger):
-    logger.write(os.path.join("logs", f"{model_name}.txt"))
-    torch.save(model.state_dict(), os.path.join("checkpoints", f"{model_name}.pt"))
+def save_checkpoint(model, save_title, logger):
+    logger.write(os.path.join("logs", f"{save_title}.txt"))
+    torch.save(model.state_dict(), os.path.join("checkpoints", f"{save_title}.pt"))
 
 
 def generator(model, data_loader):

@@ -12,9 +12,8 @@ from utils import EarlyStopMonitor, Logger, generator, save_checkpoint, set_seed
 def main(args):
     set_seed()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    data_dir = os.path.join("data", args.data_dir)
-    train_loader = make_loader("train", data_dir, args.batch_size)
-    val_loader = make_loader("val", data_dir, args.batch_size)
+    train_loader = make_loader("train", args.data_dir, args.batch_size)
+    val_loader = make_loader("val", args.data_dir, args.batch_size)
     _, label = iter(train_loader).next()
     num_labels = label.size(1)
     model = BertForPostClassification(
@@ -46,7 +45,7 @@ def main(args):
         monitor(val_loss)
         if monitor.stop:
             break
-    save_checkpoint(model, f"{args.data_dir}_{args.model_name}", logger)
+    save_checkpoint(model, f"{args.save_title}", logger)
 
 
 def run_epoch(model, data_loader, criterion, optimizer=None, scheduler=None):
@@ -75,6 +74,7 @@ if __name__ == "__main__":
         choices=["roberta-base", "distilroberta-base", "allenai/longformer-base-4096",],
     )
     parser.add_argument("--data_dir", type=str, default="")
+    parser.add_argument("--save_title", type=str, default="")
     parser.add_argument("--weight_path", type=str, default="")
     parser.add_argument("--dropout", type=float, default=0.5)
     parser.add_argument("--num_epochs", type=int, default=20)
