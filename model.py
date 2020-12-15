@@ -44,7 +44,7 @@ class BertForPostClassification(nn.Module):
     def predict(self, x, tags):
         predictions = self.forward(x) > 0
         result = [[]] * predictions.size(0)
-        index, tag_index = torch.where(result)
+        index, tag_index = map(lambda x: x.tolist(), torch.where(predictions))
         for i, tag_i in zip(index, tag_index):
             result[i].append(tags[tag_i])
         return result
