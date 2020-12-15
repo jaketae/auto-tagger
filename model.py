@@ -28,7 +28,7 @@ class BertForPostClassification(nn.Module):
 
     def to(self, device):
         self.device = device
-        self.to(device)
+        return super(BertForPostClassification, self).to(device)
 
     def forward(self, x):
         assert self.device, "Have you called `.to(device)` on this model?"

@@ -57,7 +57,7 @@ def run_epoch(model, data_loader, device, criterion, optimizer=None, scheduler=N
             scheduler is None
         ), "If `scheduler` is provided, you must also specify an `optimizer`"
     total_loss = 0
-    for (labels, outputs) in generator(model, data_loader, device):
+    for (labels, outputs) in generator(model, data_loader):
         loss = criterion(outputs, labels)
         if optimizer:
             optimizer.zero_grad()
