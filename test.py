@@ -19,11 +19,13 @@ def main(args):
     model = BertForPostClassification(args.model_name, num_labels, 0).to(device)
     model.load_state_dict(torch.load(os.path.join("checkpoints", args.weight_path)))
     model.eval()
-    print(get_accuracy(model, test_loader, device))
+    accuracy = get_accuracy(model, test_loader)
+    hamming_accuracy = get_hamming_accuracy(model, test_loader)
+    print(f"Accuracy: {accuracy}, Hamming Accuracy: {hamming_accuracy}")
 
 
 @torch.no_grad()
-def get_accuracy(model, test_loader, device):
+def get_accuracy(model, test_loader):
     num_samples = 0
     num_correct = 0
     for (labels, outputs) in generator(model, test_loader):
@@ -33,8 +35,20 @@ def get_accuracy(model, test_loader, device):
     return num_correct / num_samples
 
 
-def get_hamming_accuracy(model, tokenizer, test_loader, device):
-    return
+@torch.no_grad()
+def get_hamming_accuracy(model, test_loader):
+    scores = []
+    for (labels, outputs) in generator(model, test_loader):
+        for i in range(labels.size(0)):
+            set_true = set(torch.where(labels[i])[0].tolist())
+            set_pred = set(torch.where(outputs[i])[0].tolist())
+            denominator = len(set_true.intersection(set_pred))
+            if denominator == 0:
+                scores.append(1)
+            else:
+                numerator = len(set_true.union(set_pred))
+                scores.append(numerator / denominator)
+    return sum(scores) / len(scores)
 
 
 if __name__ == "__main__":
