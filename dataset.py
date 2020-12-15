@@ -25,3 +25,8 @@ def make_loader(mode, data_dir, batch_size):
     }, "`mode` must be one of 'train', 'val', or 'test'"
     dataset = BlogDataset(os.path.join(data_dir, f"{mode}.csv"))
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+
+def get_tags(data_dir):
+    df = pd.read_csv(os.path.join(data_dir, "val.csv"))
+    return df.columns.values.tolist()[2:]
