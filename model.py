@@ -41,11 +41,16 @@ class BertForPostClassification(nn.Module):
         return logits
 
     @torch.no_grad()
-    def predict(self, x, tags):
-        predictions = self.forward(x) > 0
+    def predict(self, x, tags, squeeze=False):
+        logits = self.forward(x)
+        if squeeze:
+            logits = logits.sum(dim=0)
+        predictions = logis > 0
         result = [[]] * predictions.size(0)
         index, tag_index = map(lambda x: x.tolist(), torch.where(predictions))
         for i, tag_i in zip(index, tag_index):
             result[i].append(tags[tag_i])
+        if squeeze:
+            return result[0]
         return result
 
