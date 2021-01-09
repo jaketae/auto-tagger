@@ -20,7 +20,7 @@ def main(args):
     model.eval()
     accuracy = get_accuracy(model, test_loader)
     hamming_accuracy = get_hamming_accuracy(model, test_loader)
-    print(f"Accuracy: {accuracy}, Hamming Accuracy: {hamming_accuracy}")
+    print(f"Accuracy: {accuracy:.4f}, Hamming Accuracy: {hamming_accuracy:.4f}")
 
 
 @torch.no_grad()
