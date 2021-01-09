@@ -38,16 +38,20 @@ def get_accuracy(model, test_loader):
 def get_hamming_accuracy(model, test_loader):
     scores = []
     for (labels, outputs) in generator(model, test_loader):
-        for i in range(labels.size(0)):
-            set_true = set(torch.where(labels[i])[0].tolist())
-            set_pred = set(torch.where(outputs[i])[0].tolist())
-            denominator = len(set_true.union(set_pred))
-            if denominator == 0:
-                scores.append(1)
-            else:
-                numerator = len(set_true.intersection(set_pred))
-                scores.append(numerator / denominator)
+        score = _hamming_accuracy(labels, outputs)
+        scores.append(score)
     return sum(scores) / len(scores)
+
+
+def _hamming_accuracy(labels, outputs):
+    for i in range(labels.size(0)):
+        set_true = set(torch.where(labels[i])[0].tolist())
+        set_pred = set(torch.where(outputs[i])[0].tolist())
+        denominator = len(set_true.union(set_pred))
+        if denominator == 0:
+            return 1
+        numerator = len(set_true.intersection(set_pred))
+        return numerator / denominator
 
 
 if __name__ == "__main__":
