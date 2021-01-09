@@ -42,6 +42,7 @@ class BertForPostClassification(nn.Module):
 
     @torch.no_grad()
     def predict(self, x, tags, squeeze=False):
+        self.eval()
         logits = self.forward(x)
         if squeeze:
             logits = logits.sum(dim=0)
