@@ -8,31 +8,11 @@ from bs4 import BeautifulSoup
 from sklearn.model_selection import train_test_split
 from tqdm.auto import tqdm
 
+from utils import chunkify
+
 
 def word_counter(sentence):
     return len(sentence.split())
-
-
-def chunkify(body, max_len, min_len):
-    chunk = ""
-    chunks = []
-    word_count = 0
-    sentences = body.split(".")
-    for sentence in sentences:
-        if not sentence:
-            continue
-        sentence += "."
-        count = word_counter(sentence)
-        if word_count <= max_len and word_count + count > max_len:
-            chunks.append(chunk.lstrip())
-            chunk = sentence
-            word_count = count
-        else:
-            chunk += sentence
-            word_count += count
-    if chunk and word_count >= min_len:
-        chunks.append(chunk.lstrip())
-    return chunks
 
 
 def get_urls():
