@@ -27,6 +27,10 @@ def generator(model, data_loader):
         yield labels, outputs
 
 
+def word_counter(sentence):
+    return len(sentence.split())
+
+
 def chunkify(body, max_len, min_len):
     chunk = ""
     chunks = []

@@ -11,10 +11,6 @@ from tqdm.auto import tqdm
 from utils import chunkify
 
 
-def word_counter(sentence):
-    return len(sentence.split())
-
-
 def get_urls():
     root = "https://jaketae.github.io/posts/"
     html = requests.get(root).text
