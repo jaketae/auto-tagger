@@ -45,8 +45,8 @@ class BertForPostClassification(nn.Module):
         self.eval()
         logits = self.forward(x)
         if squeeze:
-            logits = logits.sum(dim=0)
-        predictions = logis > 0
+            logits = logits.mean(dim=0)
+        predictions = logits > 0
         result = [[]] * predictions.size(0)
         index, tag_index = map(lambda x: x.tolist(), torch.where(predictions))
         for i, tag_i in zip(index, tag_index):
