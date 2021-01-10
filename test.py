@@ -11,11 +11,7 @@ from utils import generator, load_model, set_seed
 def main(args):
     set_seed()
     tags, test_loader = make_loader(
-        "test",
-        args.batch_size,
-        args.max_len,
-        args.min_len,
-        return_tags=True,
+        "test", args.batch_size, args.max_len, args.min_len, return_tags=True,
     )
     model = load_model(args.model_name, tags, args.save_title)
     if model.max_len != args.max_len:
@@ -69,6 +65,12 @@ if __name__ == "__main__":
             "distilroberta-base",
             "allenai/longformer-base-4096",
         ],
+    )
+    parser.add_argument(
+        "--max_len", type=int, default=256, help="maximum length of each text"
+    )
+    parser.add_argument(
+        "--min_len", type=int, default=128, help="minimum length of each text"
     )
     parser.add_argument("--save_title", type=str, help="title of saved file")
     parser.add_argument("--batch_size", type=int, default=8)

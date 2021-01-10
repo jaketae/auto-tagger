@@ -30,6 +30,10 @@ class BlogDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
+    @property
+    def tags(self):
+        return list(self.data.columns[1:])
+
 
 def make_loader(mode, batch_size, max_len, min_len, return_tags=False):
     assert mode in {
@@ -37,12 +41,9 @@ def make_loader(mode, batch_size, max_len, min_len, return_tags=False):
         "val",
         "test",
     }, "`mode` must be one of 'train', 'val', or 'test'"
-    dataset = BlogDataset(
-        os.path.join("data", f"{mode}.csv"), max_len, min_len
-    )
+    dataset = BlogDataset(os.path.join("data", f"{mode}.csv"), max_len, min_len)
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     if not return_tags:
         return data_loader
-    tags = list(dataset.data.columns[2:])
-    return tags, data_loader
+    return dataset.tags, data_loader
 
