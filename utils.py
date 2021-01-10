@@ -3,6 +3,7 @@ import os
 import random
 
 import numpy as np
+import pandas as pd
 import torch
 from tqdm.auto import tqdm
 
@@ -44,6 +45,10 @@ def generator(model, data_loader):
 
 def word_counter(sentence):
     return len(sentence.split())
+
+
+def get_tags():
+    list(pd.read_csv("data/val.csv").columns[2:])
 
 
 def chunkify(body, max_len, min_len):
@@ -116,5 +121,4 @@ class Logger:
     def write(self, out_path):
         with open(out_path, "w+") as f:
             f.write("\n".join(self.log))
-
 
