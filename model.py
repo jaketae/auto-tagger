@@ -50,7 +50,7 @@ class BertForPostClassification(nn.Module):
     @torch.no_grad()
     def predict(self, x):
         self.eval()
-        chunks = chunkify(x)
+        chunks = chunkify(x, self.max_len, self.min_len)
         logits = self.forward(chunks)
         mean_logits = logits.mean(dim=0)
         index = torch.where(mean_logits > 0)[0]
