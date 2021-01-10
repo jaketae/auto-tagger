@@ -25,6 +25,13 @@ def get_all_tags(top_tags):
     return set(tuple(strong.text for strong in ul.find_all("strong"))[:top_tags])
 
 
+def clean_body(body):
+    body = re.sub(r"\$.*?\$", "math variable", body)
+    body = re.sub(r"\\\(.*?\\\)", "math expression", body)
+    body = body.replace("[", "").replace("]", "")
+    return " ".join(body.split())
+
+
 class Parser:
     def __init__(self, url, all_tags):
         html = requests.get(url).text
@@ -51,9 +58,7 @@ class Parser:
                     remove_tag.decompose()
             result.append(p.text.strip())
         body = " ".join(result)
-        for regexp in (r"\$.*?\$", r"\\\(.*?\\\)", r"\[.*?\]"):
-            body = re.sub(regexp, "", body)
-        return body
+        return clean_body(body)
 
     def parse(self):
         title = self.get_title()
