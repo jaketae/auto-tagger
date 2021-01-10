@@ -60,6 +60,6 @@ class BertForPostClassification(nn.Module):
     @property
     def config(self):
         return {
-            "min_len": min_len,
-            "max_len": max_len,
+            "min_len": self.min_len,
+            "max_len": self.max_len,
         }
