@@ -5,19 +5,15 @@ import torch
 from transformers import AutoTokenizer
 
 from dataset import make_loader
-from model import BertForPostClassification
-from utils import generator, set_seed
+from utils import generator, load_model, set_seed
 
 
 def main(args):
     set_seed()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    test_loader = make_loader("test", args.data_dir, args.batch_size)
-    _, label = iter(test_loader).next()
-    num_labels = label.size(1)
-    model = BertForPostClassification(args.model_name, num_labels, 0).to(device)
-    model.load_state_dict(torch.load(os.path.join("checkpoints", args.weight_path)))
-    model.eval()
+    tags, test_loader = make_loader(
+        "test", args.data_dir, args.batch_size, return_tags=True
+    )
+    load_model(args.model_name, tags, args.save_title)
     accuracy = get_accuracy(model, test_loader)
     hamming_accuracy = get_hamming_accuracy(model, test_loader)
     print(f"Accuracy: {accuracy:.4f}, Hamming Accuracy: {hamming_accuracy:.4f}")
@@ -63,7 +59,7 @@ if __name__ == "__main__":
         choices=["roberta-base", "distilroberta-base", "allenai/longformer-base-4096",],
     )
     parser.add_argument("--data_dir", type=str, default="")
-    parser.add_argument("--weight_path", type=str, help="path to model weigts")
+    parser.add_argument("--save_title", type=str, help="title of saved file")
     parser.add_argument("--batch_size", type=int, default=16)
     args = parser.parse_args()
     main(args)

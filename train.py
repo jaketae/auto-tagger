@@ -6,18 +6,22 @@ from transformers import AdamW, get_linear_schedule_with_warmup
 
 from dataset import make_loader
 from model import BertForPostClassification
-from utils import EarlyStopMonitor, Logger, generator, save_checkpoint, set_seed
+from utils import EarlyStopMonitor, Logger, generator, save_model, set_seed
 
 
 def main(args):
     set_seed()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_loader = make_loader("train", args.data_dir, args.batch_size)
-    val_loader = make_loader("val", args.data_dir, args.batch_size)
-    _, label = iter(train_loader).next()
-    num_labels = label.size(1)
+    tags, val_loader = make_loader(
+        "val", args.data_dir, args.batch_size, return_tags=True
+    )
     model = BertForPostClassification(
-        args.model_name, num_labels, args.dropout, args.freeze_bert
+        args.model_name,
+        tags,
+        args.max_len,
+        args.min_len,
+        freeze_bert=args.freeze_bert,
     ).to(device)
     if args.weight_path:
         model.load_state_dict(torch.load(os.path.join("checkpoints", args.weight_path)))
@@ -45,7 +49,7 @@ def main(args):
         monitor(val_loss)
         if monitor.stop:
             break
-    save_checkpoint(model, f"{args.save_title}", logger)
+    save_model(model, f"{args.save_title}", logger)
 
 
 def run_epoch(model, data_loader, criterion, optimizer=None, scheduler=None):
@@ -70,17 +74,28 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_name",
         type=str,
-        default="roberta-base",
-        choices=["roberta-base", "distilroberta-base", "allenai/longformer-base-4096",],
+        default="distilroberta-base",
+        choices=[
+            "bert-base",
+            "distilbert-base",
+            "roberta-base",
+            "distilroberta-base",
+            "allenai/longformer-base-4096",
+        ],
     )
     parser.add_argument("--data_dir", type=str, default="")
     parser.add_argument("--save_title", type=str, default="")
     parser.add_argument("--weight_path", type=str, default="")
-    parser.add_argument("--dropout", type=float, default=0.5)
-    parser.add_argument("--num_epochs", type=int, default=20)
+    parser.add_argument("--num_epochs", type=int, default=5)
     parser.add_argument("--log_interval", type=int, default=1)
-    parser.add_argument("--batch_size", type=int, default=16)
+    parser.add_argument("--batch_size", type=int, default=1)
     parser.add_argument("--patience", type=int, default=2)
+    parser.add_argument(
+        "--max_len", type=int, default=256, help="maximum length of each text"
+    )
+    parser.add_argument(
+        "--min_len", type=int, default=128, help="minimum length of each text"
+    )
     parser.add_argument("--freeze_bert", dest="freeze_bert", action="store_true")
     parser.add_argument("--unfreeze_bert", dest="freeze_bert", action="store_false")
     parser.set_defaults(freeze_bert=True)
