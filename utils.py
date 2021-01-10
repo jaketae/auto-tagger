@@ -27,7 +27,7 @@ def load_model(model_name, tags, save_title):
     from model import BertForPostClassification
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    with open(os.path.join("checkpoints", f"{save_title}.json")):
+    with open(os.path.join("checkpoints", f"{save_title}.json")) as f:
         config = json.load(f)
     model = BertForPostClassification(model_name, tags, **config).to(device)
     model.load_state_dict(torch.load(os.path.join("checkpoints", f"{save_title}.pt")))
