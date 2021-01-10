@@ -7,7 +7,7 @@ from transformers import AdamW, get_linear_schedule_with_warmup
 
 from dataset import make_loader
 from model import BertForPostClassification
-from utils import EarlyStopMonitor, Logger, generator, save_model, set_seed
+from utils import EarlyStopMonitor, Logger, generator, load_model, save_model, set_seed
 
 
 def main(args):
@@ -53,10 +53,11 @@ def main(args):
         with torch.no_grad():
             val_loss = run_epoch(model, val_loader, criterion)
         logger(epoch, train_loss, val_loss)
+        if logger.best == val_loss:
+            save_model(model, f"{args.save_title}", logger)
         monitor(val_loss)
         if monitor.stop:
             break
-    save_model(model, f"{args.save_title}", logger)
 
 
 def run_epoch(model, data_loader, criterion, optimizer=None, scheduler=None):

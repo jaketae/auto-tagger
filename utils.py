@@ -99,6 +99,7 @@ class Logger:
         self.log_interval = log_interval
         self.num_epochs = num_epochs
         self.log = []
+        self.best = None
 
     def __call__(self, epoch, train_loss, val_loss):
         log_string = (
@@ -109,8 +110,11 @@ class Logger:
         if epoch % self.log_interval == 0:
             tqdm.write(log_string)
         self.log.append(log_string)
+        if self.best is None or val_loss < self.best:
+            self.best = val_loss
 
     def write(self, out_path):
         with open(out_path, "w+") as f:
             f.write("\n".join(self.log))
+
 
