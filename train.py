@@ -1,5 +1,6 @@
 import argparse
 import os
+import warnings
 
 import torch
 from transformers import AdamW, get_linear_schedule_with_warmup
@@ -11,12 +12,18 @@ from utils import EarlyStopMonitor, Logger, generator, save_model, set_seed
 
 def main(args):
     set_seed()
-    train_loader = make_loader("train", args.data_dir, args.batch_size)
-    tags, val_loader = make_loader(
-        "val", args.data_dir, args.batch_size, return_tags=True
-    )
+    loader_config = {
+        "data_dir": args.data_dir,
+        "batch_size": args.batch_size,
+        "max_len": args.max_len,
+        "min_len": args.min_len,
+    }
+    train_loader = make_loader("train", **loader_config)
+    tags, val_loader = make_loader("val", return_tags=True, **loader_config)
     if args.load_title:
         model = load_model(args.model_name, tags, args.load_title)
+        if model.max_len != args.max_len:
+            warnings.warn("`max_len` of model and data loader do not match")
     else:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = BertForPostClassification(
@@ -84,12 +91,11 @@ if __name__ == "__main__":
             "allenai/longformer-base-4096",
         ],
     )
-    parser.add_argument("--data_dir", type=str, default="")
-    parser.add_argument("--save_title", type=str, default="")
+    parser.add_argument("--save_title", type=str)
     parser.add_argument("--load_title", type=str, default="")
     parser.add_argument("--num_epochs", type=int, default=5)
     parser.add_argument("--log_interval", type=int, default=1)
-    parser.add_argument("--batch_size", type=int, default=1)
+    parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--patience", type=int, default=2)
     parser.add_argument(
         "--max_len", type=int, default=256, help="maximum length of each text"

@@ -11,9 +11,16 @@ from utils import generator, load_model, set_seed
 def main(args):
     set_seed()
     tags, test_loader = make_loader(
-        "test", args.data_dir, args.batch_size, return_tags=True
+        "test",
+        args.data_dir,
+        args.batch_size,
+        args.max_len,
+        args.min_len,
+        return_tags=True,
     )
     model = load_model(args.model_name, tags, args.save_title)
+    if model.max_len != args.max_len:
+        warnings.warn("`max_len` of model and data loader do not match")
     accuracy = get_accuracy(model, test_loader)
     hamming_accuracy = get_hamming_accuracy(model, test_loader)
     print(f"Accuracy: {accuracy:.4f}, Hamming Accuracy: {hamming_accuracy:.4f}")
@@ -55,11 +62,16 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_name",
         type=str,
-        default="roberta-base",
-        choices=["roberta-base", "distilroberta-base", "allenai/longformer-base-4096",],
+        default="distilroberta-base",
+        choices=[
+            "bert-base",
+            "distilbert-base",
+            "roberta-base",
+            "distilroberta-base",
+            "allenai/longformer-base-4096",
+        ],
     )
-    parser.add_argument("--data_dir", type=str, default="")
     parser.add_argument("--save_title", type=str, help="title of saved file")
-    parser.add_argument("--batch_size", type=int, default=16)
+    parser.add_argument("--batch_size", type=int, default=8)
     args = parser.parse_args()
     main(args)
