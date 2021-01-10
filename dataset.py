@@ -25,7 +25,7 @@ def make_loader(mode, data_dir, batch_size, return_tags=False):
     }, "`mode` must be one of 'train', 'val', or 'test'"
     dataset = BlogDataset(os.path.join("data", data_dir, f"{mode}.csv"))
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    if not return_labels:
+    if not return_tags:
         return data_loader
     tags = list(dataset.data.columns[2:])
     return tags, data_loader
