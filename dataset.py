@@ -17,14 +17,18 @@ class BlogDataset(Dataset):
         return len(self.data)
 
 
-def make_loader(mode, data_dir, batch_size):
+def make_loader(mode, data_dir, batch_size, return_tags=False):
     assert mode in {
         "train",
         "val",
         "test",
     }, "`mode` must be one of 'train', 'val', or 'test'"
     dataset = BlogDataset(os.path.join("data", data_dir, f"{mode}.csv"))
-    return DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    if not return_labels:
+        return data_loader
+    tags = list(dataset.data.columns[2:])
+    return tags, data_loader
 
 
 def get_tags(data_dir):
