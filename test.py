@@ -12,7 +12,6 @@ def main(args):
     set_seed()
     tags, test_loader = make_loader(
         "test",
-        args.data_dir,
         args.batch_size,
         args.max_len,
         args.min_len,

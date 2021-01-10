@@ -13,7 +13,6 @@ from utils import EarlyStopMonitor, Logger, generator, save_model, set_seed
 def main(args):
     set_seed()
     loader_config = {
-        "data_dir": args.data_dir,
         "batch_size": args.batch_size,
         "max_len": args.max_len,
         "min_len": args.min_len,
