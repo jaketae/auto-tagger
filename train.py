@@ -11,20 +11,21 @@ from utils import EarlyStopMonitor, Logger, generator, save_model, set_seed
 
 def main(args):
     set_seed()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_loader = make_loader("train", args.data_dir, args.batch_size)
     tags, val_loader = make_loader(
         "val", args.data_dir, args.batch_size, return_tags=True
     )
-    model = BertForPostClassification(
-        args.model_name,
-        tags,
-        args.max_len,
-        args.min_len,
-        freeze_bert=args.freeze_bert,
-    ).to(device)
-    if args.weight_path:
-        model.load_state_dict(torch.load(os.path.join("checkpoints", args.weight_path)))
+    if args.load_title:
+        model = load_model(args.model_name, tags, args.load_title)
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = BertForPostClassification(
+            args.model_name,
+            tags,
+            args.max_len,
+            args.min_len,
+            freeze_bert=args.freeze_bert,
+        ).to(device)
     criterion = torch.nn.BCEWithLogitsLoss()
     optimizer = AdamW(
         [
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--data_dir", type=str, default="")
     parser.add_argument("--save_title", type=str, default="")
-    parser.add_argument("--weight_path", type=str, default="")
+    parser.add_argument("--load_title", type=str, default="")
     parser.add_argument("--num_epochs", type=int, default=5)
     parser.add_argument("--log_interval", type=int, default=1)
     parser.add_argument("--batch_size", type=int, default=1)

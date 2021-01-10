@@ -13,7 +13,7 @@ def main(args):
     tags, test_loader = make_loader(
         "test", args.data_dir, args.batch_size, return_tags=True
     )
-    load_model(args.model_name, tags, args.save_title)
+    model = load_model(args.model_name, tags, args.save_title)
     accuracy = get_accuracy(model, test_loader)
     hamming_accuracy = get_hamming_accuracy(model, test_loader)
     print(f"Accuracy: {accuracy:.4f}, Hamming Accuracy: {hamming_accuracy:.4f}")
