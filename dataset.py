@@ -25,7 +25,7 @@ class BlogDataset(Dataset):
 
     def __getitem__(self, index):
         row = self.data.iloc[index]
-        return row["body"], torch.tensor(row[2:]).to(float)
+        return row["body"], torch.tensor(row[1:]).to(float)
 
     def __len__(self):
         return len(self.data)
