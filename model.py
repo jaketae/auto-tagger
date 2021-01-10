@@ -6,9 +6,7 @@ from utils import chunkify
 
 
 class BertForPostClassification(nn.Module):
-    def __init__(
-        self, model_name, tags, max_len, min_len, dropout=0.2, freeze_bert=False
-    ):
+    def __init__(self, model_name, tags, max_len, min_len, freeze_bert=False):
         super(BertForPostClassification, self).__init__()
         self.device = None
         self.tags = tags
@@ -28,7 +26,7 @@ class BertForPostClassification(nn.Module):
         hidden_size = self.bert.config.hidden_size
         self.classifier = nn.Sequential(
             nn.Linear(hidden_size, hidden_size),
-            nn.Dropout(dropout),
+            nn.Dropout(0.5),
             nn.ReLU(),
             nn.Linear(hidden_size, len(tags)),
         )
