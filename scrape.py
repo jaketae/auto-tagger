@@ -50,9 +50,9 @@ class Parser:
                 for remove_tag in p.find_all(remove_type):
                     remove_tag.decompose()
             result.append(p.text.strip())
-        text = " ".join(result)
+        body = " ".join(result)
         for regexp in (r"\$.*?\$", r"\\\(.*?\\\)", r"\[.*?\]"):
-            body = re.sub(regexp, "", text)
+            body = re.sub(regexp, "", body)
         return body
 
     def parse(self):
