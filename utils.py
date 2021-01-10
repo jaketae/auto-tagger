@@ -1,3 +1,4 @@
+import json
 import os
 import random
 
@@ -15,9 +16,23 @@ def set_seed(seed=42):
     torch.backends.cudnn.benchmark = True
 
 
-def save_checkpoint(model, save_title, logger):
+def save_model(model, save_title, logger):
     logger.write(os.path.join("logs", f"{save_title}.txt"))
     torch.save(model.state_dict(), os.path.join("checkpoints", f"{save_title}.pt"))
+    with open(os.path.join("checkpoints", f"{save_title}.json"), "w+") as f:
+        json.dump(model.config, f)
+
+
+def load_model(model_name, tags, save_title):
+    from model import BertForPostClassification
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    with open(os.path.join("checkpoints", f"{save_title}.json")):
+        config = json.load(f)
+    model = BertForPostClassification(model_name, tags, **config).to(device)
+    model.load_state_dict(torch.load(os.path.join("checkpoints", f"{save_title}.pt")))
+    model.eval()
+    return model
 
 
 def generator(model, data_loader):
