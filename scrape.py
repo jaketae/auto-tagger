@@ -8,8 +8,6 @@ from bs4 import BeautifulSoup
 from sklearn.model_selection import train_test_split
 from tqdm.auto import tqdm
 
-from utils import chunkify
-
 
 def get_urls():
     root = "https://jaketae.github.io/posts/"
@@ -28,12 +26,10 @@ def get_all_tags(top_tags):
 
 
 class Parser:
-    def __init__(self, url, all_tags, max_len, min_len):
+    def __init__(self, url, all_tags):
         html = requests.get(url).text
         self.soup = BeautifulSoup(html, "html.parser")
         self.all_tags = all_tags
-        self.max_len = max_len
-        self.min_len = min_len
 
     def get_title(self):
         return self.soup.find("h1", {"id": "page-title"}).text.strip()
@@ -46,7 +42,7 @@ class Parser:
                 tags.add(tag.text)
         return {tag: int(tag in tags) for tag in self.all_tags}
 
-    def get_chunks(self):
+    def get_body(self):
         result = []
         p_tags = self.soup.find_all("p", class_="")
         for p in p_tags:
@@ -56,19 +52,15 @@ class Parser:
             result.append(p.text.strip())
         text = " ".join(result)
         for regexp in (r"\$.*?\$", r"\\\(.*?\\\)", r"\[.*?\]"):
-            text = re.sub(regexp, "", text)
-        chunks = chunkify(text, self.max_len, self.min_len)
-        return chunks
+            body = re.sub(regexp, "", text)
+        return body
 
     def parse(self):
-        parsed = []
         title = self.get_title()
-        chunks = self.get_chunks()
+        body = self.get_body()
         tags = self.get_tags()
         if sum(tags.values()):
-            for chunk in chunks:
-                parsed.append({"title": title, "body": chunk, **tags})
-            return parsed
+            return {"title": title, "body": body, **tags}
 
 
 def main(args):
@@ -76,14 +68,14 @@ def main(args):
     urls = get_urls()
     all_tags = get_all_tags(args.top_tags)
     for url in tqdm(urls):
-        parser = Parser(url, all_tags, args.max_len, args.min_len)
+        parser = Parser(url, all_tags)
         data = parser.parse()
-        if data:
-            posts.extend(data)
+        if data is not None:
+            posts.append(data)
     total_df = pd.DataFrame(posts).set_index("title")
     tv_df, test_df = train_test_split(total_df, test_size=args.test_size)
     train_df, val_df = train_test_split(tv_df, test_size=args.val_size)
-    target_dir = os.path.join("data", f"{args.max_len}")
+    target_dir = "data"
     if not os.path.isdir(target_dir):
         os.mkdir(target_dir)
     for title, df in zip(("train", "val", "test"), (train_df, val_df, test_df)):
@@ -92,12 +84,6 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--max_len", type=int, default=256, help="maximum length of each text"
-    )
-    parser.add_argument(
-        "--min_len", type=int, default=128, help="minimum length of each text"
-    )
     parser.add_argument(
         "--top_tags", type=int, default=8, help="number of top tags to include",
     )
