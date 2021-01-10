@@ -48,7 +48,7 @@ def word_counter(sentence):
 
 
 def get_tags():
-    list(pd.read_csv("data/val.csv").columns[2:])
+    return list(pd.read_csv("data/val.csv").columns[2:])
 
 
 def chunkify(body, max_len, min_len):
