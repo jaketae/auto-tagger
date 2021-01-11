@@ -1,7 +1,6 @@
 .DS_Store
 .ipynb_checkpoints
-test.ipynb
-example.ipynb
+checkpoints/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
