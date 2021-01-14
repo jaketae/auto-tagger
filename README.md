@@ -1,8 +1,6 @@
 # Auto Tagger
 
-Auto Tagger is a project created to 
-
-custom fine-tuned BERT model that can automatically generate tags for posts on my [study blog](http://jaketae.github.io/).
+Auto Tagger is a BERT fine-tuner that can automatically generate tags for posts on my [study blog](http://jaketae.github.io/).
 
 ## Motivation
 
