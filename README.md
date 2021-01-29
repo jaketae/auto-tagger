@@ -135,6 +135,7 @@ While fine-tuning works well, it has a number of clear disadvantages:
 
 * Difficulty of adding new, unseen tags
 * Possibility of catastrophic forgetting during retraining
+* In a multi-class, multi-label setting, too much labels can lead to adverse results
 
 In short, fine-tuning a model in a supervised context necessarily means that it is difficult to dynamically add or remove dataset labels once the model has been fully trained.
 
