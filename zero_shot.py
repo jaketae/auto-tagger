@@ -9,19 +9,15 @@ from utils import get_all_tags, set_seed
 def main(args):
     # https://github.com/joeddav/zero-shot-demo/blob/master/app.py
     set_seed()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = 0 if torch.cuda.is_available() else -1
     tags = get_all_tags()
-    test_loader = make_loader(
-        "test", args.batch_size, args.max_len, args.min_len, return_tags=False,
-    )
     model_name = args.model_name
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     classifier = pipeline(
         "zero-shot-classification", model=model_name, tokenizer=tokenizer, device=device
     )
-    for (sequence, _) in tqdm(test_loader):
-        result = classifier(sequence, tags, multi_class=True)
-        print(result)
+    result = classifier(args.text, tags, multi_class=True)
+    print(result)
 
 
 if __name__ == "__main__":
@@ -32,5 +28,6 @@ if __name__ == "__main__":
         default="facebook/bart-large-mnli",
         choices=["facebook/bart-large-mnli", "roberta-large-mnli",],
     )
+    parser.add_argument("--text", type=str)
     args = parser.parse_args()
     main(args)
