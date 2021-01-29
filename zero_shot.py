@@ -17,6 +17,7 @@ def main(args):
         "zero-shot-classification", model=model_name, tokenizer=tokenizer, device=device
     )
     result = classifier(args.text, tags, multi_class=True)
+    del result["sequence"]
     print(result)
 
 
