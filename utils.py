@@ -51,6 +51,12 @@ def get_tags():
     return list(pd.read_csv("data/val.csv").columns[2:])
 
 
+def get_all_tags():
+    with open(os.path.join("data", "all_tags.json")) as f:
+        all_tags = json.load(f)
+    return all_tags
+
+
 def chunkify(body, max_len, min_len):
     chunk = ""
     chunks = []
